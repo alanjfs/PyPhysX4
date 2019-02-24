@@ -2,6 +2,7 @@
 #include <string>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 
 #include "PxPhysicsAPI.h"
 #include "foundation/PxPreprocessor.h"
@@ -24,7 +25,7 @@ PxMaterial*             gMaterial = NULL;
 
 PxPvd*                  gPvd = NULL;
 
-PxReal stackZ = 10.0f;
+
 
 void createDynamic(const PxTransform& t,
                    const PxGeometry& geometry,
@@ -40,25 +41,6 @@ void createPlane(PxPlane& plane)
 {
     PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, plane, *gMaterial);
     gScene->addActor(*groundPlane);
-}
-
-void createStack(const PxTransform& t,
-                 PxU32 size,
-                 PxReal halfExtent)
-{
-    PxShape* shape = gPhysics->createShape(PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
-    for (PxU32 i = 0; i<size; i++)
-    {
-        for (PxU32 j = 0; j<size - i; j++)
-        {
-            PxTransform localTm(PxVec3(PxReal(j * 2) - PxReal(size - i), PxReal(i * 2 + 1), 0) * halfExtent);
-            PxRigidDynamic* body = gPhysics->createRigidDynamic(t.transform(localTm));
-            body->attachShape(*shape);
-            PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
-            gScene->addActor(*body);
-        }
-    }
-    shape->release();
 }
 
 void initPhysics()
@@ -111,6 +93,7 @@ PYBIND11_MODULE(PhysX4, m) {
     m.doc() = "PhysX4 Python Bindings"; // optional module docstring
 
     py::class_<PxVec3>(m, "PxVec3")
+        .def(py::init<>())
         .def(py::init<const PxReal,
                       const PxReal,
                       const PxReal>())
@@ -118,6 +101,14 @@ PYBIND11_MODULE(PhysX4, m) {
         .def_readwrite("x", &PxVec3::x)
         .def_readwrite("y", &PxVec3::y)
         .def_readwrite("z", &PxVec3::z)
+
+        .def(py::self + py::self)
+        .def(py::self += py::self)
+        .def(py::self -= py::self)
+        .def(py::self *= float())
+        .def(py::self /= float())
+        .def(py::self * float())
+        .def(py::self / float())
 
         // Support print(vec)
         .def("__repr__", [](const PxVec3 &a) {
@@ -159,12 +150,17 @@ PYBIND11_MODULE(PhysX4, m) {
         .def(py::init<>())
         .def(py::init<const PxVec3 &>())
 
-        // Support passing xyz
+        // Support passing position
         .def(py::init([](const PxReal x,
                          const PxReal y,
                          const PxReal z) {
             return PxTransform(PxVec3(x, y, z));
-        }));
+        }))
+        .def("transform", [](const PxTransform &self, const PxTransform &other) {
+            return self.transform(other);
+        })
+        .def_readwrite("p", &PxTransform::p)
+        .def_readwrite("q", &PxTransform::q);
 
     // Needed for below subclasses
     py::class_<PxGeometry>(m, "PxGeometry");
@@ -194,15 +190,10 @@ PYBIND11_MODULE(PhysX4, m) {
           py::arg("timestep"));
 
     m.def("createPlane", &createPlane, "Create a plane",
-          py::arg("plane"));
+          py::arg("plane") = PxPlane(0, 1, 0, 0));
 
     m.def("createDynamic", &createDynamic, "Create a dynamic actor",
           py::arg("transform"),
-          py::arg("geometry"),
-          py::arg("velocity"));
-
-    m.def("createStack", &createStack, "Create a stack of boxes",
-          py::arg("transform"),
-          py::arg("size"),
-          py::arg("halfExtent"));
+          py::arg("geometry") = PxBoxGeometry(1, 1, 1),
+          py::arg("velocity") = PxVec3(0, 0, 0));
 }

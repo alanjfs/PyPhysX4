@@ -1,39 +1,11 @@
-import time
 import PhysX4 as px
 
-if __name__ == '__main__':
-    px.initPhysics()
+v = px.PxVec3(2, 2, 2)
+v *= 0.5
+assert v.x == 1.0
 
-    px.createPlane(
-        px.PxPlane(0, 1, 0, 0)
-    )
+tm = px.PxTransform(px.PxVec3(1, 1, 1))
+assert tm.p.x == 1
 
-    px.createStack(
-        px.PxTransform(px.PxVec3(0, 0, 10.0)),
-        size=5,
-        halfExtent=2.0
-    )
-
-    px.createDynamic(
-        px.PxTransform(px.PxVec3(0, 50, 100)),
-        geometry=px.PxCapsuleGeometry(radius=5, halfHeight=5),
-        velocity=px.PxVec3(0, -50, -100)
-    )
-
-    print("Simulating..")
-
-    t0 = time.time()
-    steps = 100
-    timestep = 1.0 / 30
-    for i in range(steps):
-        px.stepPhysics(timestep)
-
-    t1 = time.time()
-    duration = t1 - t0
-
-    px.cleanupPhysics()
-
-    print(
-        "Finished in %.2f ms (%d fps)"
-        % (duration * 1000, steps / duration)
-    )
+tm2 = tm.transform(px.PxTransform(px.PxVec3(2, 2, 2)))
+assert tm2.p.x == 3
