@@ -40,9 +40,13 @@ $ cd PyPhysX4\compiler\vc140win64\PyPhysX4
 $ msbuild PyPhysX4.sln /p:Configuration=Release;Platform=x64
 ```
 
+<br>
+
 ### Usage
 
 Launch the PhysX Visual Debugger and run the below snippet to try things out.
+
+![pyphysx](https://user-images.githubusercontent.com/2152766/53298860-6b82e380-382b-11e9-86aa-dd6ececa3c99.gif)
 
 **test.py**
 
