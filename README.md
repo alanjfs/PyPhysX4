@@ -31,6 +31,8 @@ $ externals\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysX4_64.dll
 $ externals\pybind11\include\pybind11\pybind11.h
 ```
 
+It also assumes Python 3.6 is installed at `c:\Python36`.
+
 **Building**
 
 The project generates a `PhysX4.pyd` file in the `bin\` directory of the repository, and copies relevant DLLs from the PhysX4 project.
@@ -54,31 +56,53 @@ Launch the PhysX Visual Debugger and run the below snippet to try things out.
 import time
 import PhysX4 as px
 
+def createStack(t, size, halfExtent):
+    """Create a stack of boxes"""
+
+    for i in range(size):
+        for j in range(size - i):
+            pos = px.PxVec3(
+                j * 2 - size + i,
+                i * 2 + 1,
+                0
+            ) * halfExtent
+
+            px.createDynamic(
+                t.transform(px.PxTransform(pos)),
+                geometry=px.PxBoxGeometry(halfExtent, halfExtent, halfExtent),
+            )
+
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--steps", type=int, default=100)
+    parser.add_argument("--size", type=int, default=10)
+
+    args = parser.parse_args()
+
     px.initPhysics()
+    px.createPlane()
 
-    px.createPlane(
-        px.PxPlane(0, 1, 0, 0)
-    )
-
-    px.createStack(
-        px.PxTransform(px.PxVec3(0, 0, 10.0)),
-        size=5,
+    createStack(
+        px.PxTransform(px.PxVec3(0, 0, -30.0)),
+        size=args.size,
         halfExtent=2.0
     )
 
+    # Throw an actor at it
     px.createDynamic(
         px.PxTransform(px.PxVec3(0, 50, 100)),
         geometry=px.PxCapsuleGeometry(radius=5, halfHeight=5),
         velocity=px.PxVec3(0, -50, -100)
     )
 
-    print("Simulating..")
+    count = (args.size ** 2) / 2 + args.size / 2
+    print("Simulating %d boxes in %d steps.." % (count, args.steps))
 
     t0 = time.time()
-    steps = 100
     timestep = 1.0 / 30
-    for i in range(steps):
+    for i in range(args.steps):
         px.stepPhysics(timestep)
 
     t1 = time.time()
@@ -88,6 +112,7 @@ if __name__ == '__main__':
 
     print(
         "Finished in %.2f ms (%d fps)"
-        % (duration * 1000, steps / duration)
+        % (duration * 1000, args.steps / duration)
     )
+
 ```
