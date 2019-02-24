@@ -1,0 +1,34 @@
+bin/**
+
+# C++
+*.obj
+*.o
+*.ilk
+*.enc
+*.la
+*.lo
+*.sbr
+*.tlog
+*.lastbuildstate
+*.pdb
+*.idb
+*.bsc
+*.sdf
+*.log
+*.opendb
+*.user
+*.VC.db
+.vs/
+.suo
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Python
+*.pyc
+*.jsc
+__pycache__
+*.qmlc
+**.ink
+_*.png

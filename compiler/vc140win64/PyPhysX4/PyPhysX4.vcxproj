@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\cpp\src\main.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{45B1841F-78FF-45C1-863D-F2237C517851}</ProjectGuid>
+    <RootNamespace>PyPhysX4</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>PhysX4</TargetName>
+    <TargetExt>.pyd</TargetExt>
+    <IntDir>$(ProjectName).dir\release\</IntDir>
+    <OutDir>$(ProjectRoot)\bin\release\</OutDir>
+    <LinkIncremental>
+    </LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectRoot)cpp\include;$(ProjectExternals)\PhysX\physx\include;$(ProjectExternals)\PhysX\physx\include\common;$(ProjectExternals)\PhysX\physx\include\geometry;$(ProjectExternals)\PhysX\physx\include\geomutils;$(ProjectExternals)\PhysX\physx\..\pxshared\include;$(ProjectExternals)\PhysX\physx\source\foundation\include;$(ProjectExternals)\PhysX\physx\source\geomutils\include;$(ProjectExternals)\PhysX\physx\source\geomutils\src;$(ProjectExternals)\PhysX\physx\source\geomutils\src\contact;$(ProjectExternals)\PhysX\physx\source\geomutils\src\common;$(ProjectExternals)\PhysX\physx\source\geomutils\src\convex;$(ProjectExternals)\PhysX\physx\source\geomutils\src\distance;$(ProjectExternals)\PhysX\physx\source\geomutils\src\sweep;$(ProjectExternals)\PhysX\physx\source\geomutils\src\gjk;$(ProjectExternals)\PhysX\physx\source\geomutils\src\intersection;$(ProjectExternals)\PhysX\physx\source\geomutils\src\mesh;$(ProjectExternals)\PhysX\physx\source\geomutils\src\hf;$(ProjectExternals)\PhysX\physx\source\geomutils\src\pcm;$(ProjectExternals)\PhysX\physx\source\geomutils\src\ccd;$(ProjectExternals)\PhysX\physx\snippets\Graphics\include\win32\GL;$(ProjectExternals)\pybind11\include;C:\Python36\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXExtensions_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXCharacterKinematic_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXCooking_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXVehicle_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXPvdSDK_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\SnippetUtils_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\SnippetRender_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysX_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\FastXml_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXCommon_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\debug\PhysXFoundation_64.lib;$(ProjectExternals)\PhysX\physx\snippets\Graphics\lib\win64\glut\glut32.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;C:\Python36\libs\python36.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>
+      </SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectRoot)cpp\include;$(ProjectExternals)\PhysX\physx\include;$(ProjectExternals)\PhysX\physx\include\common;$(ProjectExternals)\PhysX\physx\include\geometry;$(ProjectExternals)\PhysX\physx\include\geomutils;$(ProjectExternals)\PhysX\physx\..\pxshared\include;$(ProjectExternals)\PhysX\physx\source\foundation\include;$(ProjectExternals)\PhysX\physx\source\geomutils\include;$(ProjectExternals)\PhysX\physx\source\geomutils\src;$(ProjectExternals)\PhysX\physx\source\geomutils\src\contact;$(ProjectExternals)\PhysX\physx\source\geomutils\src\common;$(ProjectExternals)\PhysX\physx\source\geomutils\src\convex;$(ProjectExternals)\PhysX\physx\source\geomutils\src\distance;$(ProjectExternals)\PhysX\physx\source\geomutils\src\sweep;$(ProjectExternals)\PhysX\physx\source\geomutils\src\gjk;$(ProjectExternals)\PhysX\physx\source\geomutils\src\intersection;$(ProjectExternals)\PhysX\physx\source\geomutils\src\mesh;$(ProjectExternals)\PhysX\physx\source\geomutils\src\hf;$(ProjectExternals)\PhysX\physx\source\geomutils\src\pcm;$(ProjectExternals)\PhysX\physx\source\geomutils\src\ccd;$(ProjectExternals)\PhysX\physx\snippets\Graphics\include\win32\GL;$(ProjectExternals)\pybind11\include;C:\Python36\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_HAS_ITERATOR_DEBUGGING=0;_ITERATOR_DEBUG_LEVEL=0;NDEBUG;WIN32;WIN64;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_WINSOCK_DEPRECATED_NO_WARNINGS;PX_BUILD_NUMBER=0;RENDER_SNIPPET;PX_CHECKED=1;PX_NVTX=0;PX_SUPPORT_PVD=1;CMAKE_INTDIR="checked";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <OmitFramePointers>true</OmitFramePointers>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>
+      </EnableCOMDATFolding>
+      <OptimizeReferences>
+      </OptimizeReferences>
+      <AdditionalDependencies>$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXExtensions_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXCharacterKinematic_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXCooking_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXVehicle_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXPvdSDK_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\SnippetUtils_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\SnippetRender_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysX_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\FastXml_static_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXCommon_64.lib;$(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXFoundation_64.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;C:\Python36\libs\python36.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <PostBuildEvent>
+      <Command>xcopy /D $(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysX_64.dll $(OutDir)
+xcopy /D $(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXCommon_64.dll $(OutDir)
+xcopy /D $(ProjectExternals)\PhysX\physx\bin\win.x86_64.vc140.mt\checked\PhysXFoundation_64.dll $(OutDir)</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy PhysX DLLs</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
