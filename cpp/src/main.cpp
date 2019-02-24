@@ -12,9 +12,11 @@
 
 using namespace physx;
 
-typedef uint32_t RigidId;
-typedef std::map<uint32_t, PxRigidDynamic*> RigidMap;
-typedef std::pair<uint32_t, PxRigidDynamic*> RigidPair;
+typedef uint32_t UniqueId;
+typedef std::map<uint32_t, PxRigidActor*> ActorMap;
+typedef std::pair<uint32_t, PxRigidActor*> ActorPair;
+typedef std::map<uint32_t, PxJoint*> JointMap;
+typedef std::pair<uint32_t, PxJoint*> JointPair;
 
 PxDefaultAllocator      gAllocator;
 PxDefaultErrorCallback  gErrorCallback;
@@ -29,29 +31,97 @@ PxMaterial*             gMaterial = NULL;
 
 PxPvd*                  gPvd = NULL;
 
-RigidId                 gActorCount = 0;
-RigidMap                gActors;
+UniqueId                gUniqueId = 1;
+ActorMap                gActors = {ActorPair(0, NULL)};
+JointMap                gJoints = {JointPair(0, NULL)};
 
-RigidId createDynamic(const PxTransform& t,
-                      const PxGeometry& geometry,
-                      const PxVec3& linearVelocity = PxVec3(0, 0, 0),
-                      const PxVec3& angularVelocity = PxVec3(0, 0, 0))
+UniqueId createDynamic(const PxTransform& t,
+                       const PxGeometry& geometry,
+                       const PxVec3& linearVelocity = PxVec3(0, 0, 0),
+                       const PxVec3& angularVelocity = PxVec3(0, 0, 0),
+                       const PxReal density = PxReal(1.0f))
 {
-    PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, 10.0f);
+    PxRigidDynamic* dynamic = PxCreateDynamic(*gPhysics, t, geometry, *gMaterial, density);
     dynamic->setAngularDamping(0.5f);
     dynamic->setLinearVelocity(linearVelocity);
     dynamic->setAngularVelocity(angularVelocity);
     gScene->addActor(*dynamic);
 
-    gActorCount += 1;
-    gActors.insert(RigidPair(gActorCount, dynamic));
+    gUniqueId += 1;
+    gActors.insert(ActorPair(gUniqueId, dynamic));
 
-    return gActorCount;
+    return gUniqueId;
 }
+
 void createPlane(PxPlane& plane)
 {
     PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, plane, *gMaterial);
     gScene->addActor(*groundPlane);
+}
+
+UniqueId createDampedD6(UniqueId parent,
+                        const PxTransform& parentFrame,
+                        UniqueId child,
+                        const PxTransform& childFrame)
+{
+
+    PxD6Joint* joint = PxD6JointCreate(*gPhysics,
+                                       gActors[parent],
+                                       parentFrame,
+                                       gActors[child],
+                                       childFrame);
+
+    joint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
+    joint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
+    joint->setMotion(PxD6Axis::eTWIST, PxD6Motion::eFREE);
+    joint->setDrive(PxD6Drive::eSLERP, PxD6JointDrive(0, 1000, FLT_MAX, true));
+
+    gUniqueId += 1;
+    gJoints.insert(JointPair(gUniqueId, joint));
+
+    return gUniqueId;
+}
+
+// spherical joint limited to an angle of at most pi/4 radians (45 degrees)
+UniqueId createLimitedSpherical(UniqueId parent,
+                                const PxTransform& parentFrame,
+                                UniqueId child,
+                                const PxTransform& childFrame)
+{
+    PxSphericalJoint* joint = PxSphericalJointCreate(*gPhysics,
+                                                     gActors[parent],
+                                                     parentFrame,
+                                                     gActors[child],
+                                                     childFrame);
+
+    joint->setLimitCone(PxJointLimitCone(PxPi / 4, PxPi / 4, 0.05f));
+    joint->setSphericalJointFlag(PxSphericalJointFlag::eLIMIT_ENABLED, true);
+
+    gUniqueId += 1;
+    gJoints.insert(JointPair(gUniqueId, joint));
+
+    return gUniqueId;
+}
+
+// fixed, breakable joint
+UniqueId createBreakableFixed(UniqueId parent,
+                              const PxTransform& parentFrame,
+                              UniqueId child,
+                              const PxTransform& childFrame)
+{
+    PxFixedJoint* joint = PxFixedJointCreate(*gPhysics,
+                                             gActors[parent],
+                                             parentFrame,
+                                             gActors[child],
+                                             childFrame);
+    joint->setBreakForce(1000, 100000); 
+    joint->setConstraintFlag(PxConstraintFlag::eDRIVE_LIMITS_ARE_FORCES, true);
+    joint->setConstraintFlag(PxConstraintFlag::eDISABLE_PREPROCESSING, true);
+
+    gUniqueId += 1;
+    gJoints.insert(JointPair(gUniqueId, joint));
+
+    return gUniqueId;
 }
 
 void initPhysics()
@@ -63,10 +133,11 @@ void initPhysics()
     gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
     gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
+    PxInitExtensions(*gPhysics, gPvd);
 
     PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
     sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-    gDispatcher = PxDefaultCpuDispatcherCreate(8);
+    gDispatcher = PxDefaultCpuDispatcherCreate(2);
     sceneDesc.cpuDispatcher = gDispatcher;
     sceneDesc.filterShader = PxDefaultSimulationFilterShader;
     gScene = gPhysics->createScene(sceneDesc);
@@ -95,6 +166,7 @@ void cleanupPhysics()
     PxPvdTransport* transport = gPvd->getTransport();
     gPvd->release();
     transport->release();
+    PxCloseExtensions();
     gFoundation->release();
 }
 
@@ -126,12 +198,15 @@ PYBIND11_MODULE(PhysX4, m) {
         .def_readwrite("z", &PxVec3::z)
 
         .def(py::self + py::self)
+        .def(py::self - py::self)
         .def(py::self += py::self)
         .def(py::self -= py::self)
         .def(py::self *= float())
         .def(py::self /= float())
         .def(py::self * float())
         .def(py::self / float())
+
+        .def("__neg__",   [](PxVec3 v) { return -v; })
 
         // Support print(vec)
         .def("__repr__", [](const PxVec3 &a) {
@@ -176,6 +251,8 @@ PYBIND11_MODULE(PhysX4, m) {
         .def(py::init<>())
         .def(py::init<const PxVec3 &>())
         .def(py::init<const PxVec3 &, const PxQuat &>())
+
+        .def(py::self * py::self)
 
         // Support passing position
         .def(py::init([](const PxReal x,
@@ -224,6 +301,24 @@ PYBIND11_MODULE(PhysX4, m) {
           py::arg("geometry") = PxBoxGeometry(1, 1, 1),
           py::arg("linearVelocity") = PxVec3(0, 0, 0),
           py::arg("angularVelocity") = PxVec3(0, 0, 0));
+
+    m.def("createDampedD6", &createDampedD6, "Create a D6 joint between two actors",
+          py::arg("parent"),
+          py::arg("parentFrame"),
+          py::arg("child"),
+          py::arg("childFrame"));
+
+    m.def("createLimitedSpherical", &createLimitedSpherical, "Create a limited spherical joint between two actors",
+          py::arg("parent"),
+          py::arg("parentFrame"),
+          py::arg("child"),
+          py::arg("childFrame"));
+
+    m.def("createBreakableFixed", &createBreakableFixed, "Create a fixed, but breakable joint between two actors",
+          py::arg("parent"),
+          py::arg("parentFrame"),
+          py::arg("child"),
+          py::arg("childFrame"));
 
     m.def("getGlobalPose", &getGlobalPose);
 }
