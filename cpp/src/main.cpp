@@ -36,6 +36,12 @@ void createDynamic(const PxTransform& t,
     gScene->addActor(*dynamic);
 }
 
+void createPlane(PxPlane& plane)
+{
+    PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, plane, *gMaterial);
+    gScene->addActor(*groundPlane);
+}
+
 void createStack(const PxTransform& t,
                  PxU32 size,
                  PxReal halfExtent)
@@ -80,9 +86,6 @@ void initPhysics()
         pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
     }
     gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-
-    PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
-    gScene->addActor(*groundPlane);
 }
 
 void stepPhysics(const PxReal timestep)
@@ -144,6 +147,14 @@ PYBIND11_MODULE(PhysX4, m) {
         }
     );
 
+    py::class_<PxPlane>(m, "PxPlane")
+        .def(py::init<const PxReal, const PxReal, const PxReal, const PxReal>(),
+             py::arg("nx"),
+             py::arg("ny"),
+             py::arg("nz"),
+             py::arg("distance"))
+        .def(py::init<const PxPlane &>());
+
     py::class_<PxTransform>(m, "PxTransform")
         .def(py::init<>())
         .def(py::init<const PxVec3 &>())
@@ -181,6 +192,9 @@ PYBIND11_MODULE(PhysX4, m) {
 
     m.def("stepPhysics", &stepPhysics, "Step physics",
           py::arg("timestep"));
+
+    m.def("createPlane", &createPlane, "Create a plane",
+          py::arg("plane"));
 
     m.def("createDynamic", &createDynamic, "Create a dynamic actor",
           py::arg("transform"),
