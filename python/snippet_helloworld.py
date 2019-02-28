@@ -41,7 +41,7 @@ if __name__ == '__main__':
     px.createDynamic(
         px.PxTransform(px.PxVec3(0, 50, 100)),
         geometry=px.PxCapsuleGeometry(radius=5, halfHeight=5),
-        velocity=px.PxVec3(0, -50, -100)
+        linearVelocity=px.PxVec3(0, -50, -100)
     )
 
     count = (args.size ** 2) / 2 + args.size / 2

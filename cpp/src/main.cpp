@@ -124,7 +124,7 @@ UniqueId createBreakableFixed(UniqueId parent,
     return gUniqueId;
 }
 
-void initPhysics()
+void initPhysics(const PxTolerancesScale tolerances = PxTolerancesScale())
 {
     gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
@@ -132,7 +132,7 @@ void initPhysics()
     PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
     gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
-    gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
+    gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, tolerances, true, gPvd);
     PxInitExtensions(*gPhysics, gPvd);
 
     PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
@@ -177,7 +177,7 @@ void cleanupPhysics()
  * let the called fetch the pose from an actor in a global registry.
  *
  */
-PxTransform getGlobalPose(uint32_t id)
+PxTransform getGlobalPose(UniqueId id)
 {
     return gActors[id]->getGlobalPose();
 }
@@ -230,12 +230,13 @@ PYBIND11_MODULE(PhysX4, m) {
         .def_readwrite("y", &PxQuat::y)
         .def_readwrite("z", &PxQuat::z)
         .def_readwrite("w", &PxQuat::w)
-        .def("__repr__", [](const PxQuat &a) {
+
+        .def("__repr__", [](const PxQuat &q) {
             return "<PhysX4.PxQuat( " +
-                   std::to_string(a.x) + ", " +
-                   std::to_string(a.y) + ", " +
-                   std::to_string(a.z) + ", " +
-                   std::to_string(a.w) + " )>";
+                   std::to_string(q.x) + ", " +
+                   std::to_string(q.y) + ", " +
+                   std::to_string(q.z) + ", " +
+                   std::to_string(q.w) + " )>";
         }
     );
 
@@ -266,6 +267,12 @@ PYBIND11_MODULE(PhysX4, m) {
         .def_readwrite("p", &PxTransform::p)
         .def_readwrite("q", &PxTransform::q);
 
+    py::class_<PxTolerancesScale>(m, "PxTolerancesScale")
+        .def(py::init<>())
+        .def_readwrite("length", &PxTolerancesScale::length)
+        .def_readwrite("speed", &PxTolerancesScale::speed);
+
+
     // Needed for below subclasses
     py::class_<PxGeometry>(m, "PxGeometry");
 
@@ -287,7 +294,9 @@ PYBIND11_MODULE(PhysX4, m) {
                       py::arg("z") = 1);
 
     // API
-    m.def("initPhysics", &initPhysics, "Init physics");
+    m.def("initPhysics", &initPhysics, "Init physics",
+          py::arg("tolerances") = PxTolerancesScale());
+
     m.def("cleanupPhysics", &cleanupPhysics, "Cleanup physics");
 
     m.def("stepPhysics", &stepPhysics, "Step physics",
@@ -300,7 +309,9 @@ PYBIND11_MODULE(PhysX4, m) {
           py::arg("transform"),
           py::arg("geometry") = PxBoxGeometry(1, 1, 1),
           py::arg("linearVelocity") = PxVec3(0, 0, 0),
-          py::arg("angularVelocity") = PxVec3(0, 0, 0));
+          py::arg("angularVelocity") = PxVec3(0, 0, 0),
+          py::arg("density") = PxReal(1)
+    );
 
     m.def("createDampedD6", &createDampedD6, "Create a D6 joint between two actors",
           py::arg("parent"),
