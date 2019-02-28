@@ -13,7 +13,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     px.initPhysics()
-    px.createPlane()
+
+    material = px.createMaterial(1, 1, 0)
+
+    px.createStatic(
+        px.PxTransform(
+            px.PxVec3(0, 0, 0),
+            px.PxQuat(px.PxHalfPi, px.PxVec3(0, 0, 1))
+        ),
+        shape=px.createShape(
+            geometry=px.PxPlaneGeometry(),
+            material=material,
+        )
+    )
 
     # Throw an actor at it
     ball = px.createDynamic(
@@ -22,17 +34,21 @@ if __name__ == '__main__':
             angleRadians=math.radians(30),
             unitAxis=px.PxVec3(0, 0, 1))
         ),
-        geometry=px.PxCapsuleGeometry(radius=0.5, halfHeight=0.5),
-        linearVelocity=px.PxVec3(0, 5, 1),
-        angularVelocity=px.PxVec3(0, 0, math.radians(200)),
+        shape=px.createShape(
+            geometry=px.PxCapsuleGeometry(radius=0.5, halfHeight=0.5),
+            material=material
+        )
     )
+
+    ball.setLinearVelocity(px.PxVec3(0, 5, 1))
+    ball.setAngularVelocity(px.PxVec3(0, 0, math.radians(200)))
 
     t0 = time.time()
     timestep = 1.0 / 30
     for i in range(args.steps):
         px.stepPhysics(timestep)
 
-        tm = px.getGlobalPose(ball)
+        tm = ball.getGlobalPose()
         print(tm.p, tm.q)
 
     t1 = time.time()

@@ -5,6 +5,10 @@ import PhysX4 as px
 def createStack(t, size, halfExtent):
     """Create a stack of boxes"""
 
+    geometry = px.PxBoxGeometry(halfExtent, halfExtent, halfExtent)
+    material = px.createMaterial()
+    shape = px.createShape(geometry=geometry, material=material)
+
     for i in range(size):
         for j in range(size - i):
             pos = px.PxVec3(
@@ -14,8 +18,8 @@ def createStack(t, size, halfExtent):
             ) * halfExtent
 
             px.createDynamic(
-                t.transform(px.PxTransform(pos)),
-                geometry=px.PxBoxGeometry(halfExtent, halfExtent, halfExtent),
+                transform=t.transform(px.PxTransform(pos)),
+                shape=shape
             )
 
 
@@ -29,7 +33,18 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     px.initPhysics()
-    px.createPlane()
+
+    # Plane
+    px.createStatic(
+        px.PxTransform(
+            px.PxVec3(0, 0, 0),
+            px.PxQuat(px.PxHalfPi, px.PxVec3(0, 0, 1))
+        ),
+        shape=px.createShape(
+            geometry=px.PxPlaneGeometry(),
+            material=px.createMaterial(0, 0, 1),
+        )
+    )
 
     createStack(
         px.PxTransform(px.PxVec3(0, 0, -30.0)),
@@ -38,11 +53,15 @@ if __name__ == '__main__':
     )
 
     # Throw an actor at it
-    px.createDynamic(
+    ball = px.createDynamic(
         px.PxTransform(px.PxVec3(0, 50, 100)),
-        geometry=px.PxCapsuleGeometry(radius=5, halfHeight=5),
-        linearVelocity=px.PxVec3(0, -50, -100)
+        shape=px.createShape(
+            geometry=px.PxCapsuleGeometry(radius=5, halfHeight=5),
+            material=px.createMaterial(0, 0, 1),
+        )
     )
+
+    ball.setLinearVelocity(px.PxVec3(0, -50, -100))
 
     count = (args.size ** 2) / 2 + args.size / 2
     print("Simulating %d boxes in %d steps.." % (count, args.steps))
