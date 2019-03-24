@@ -1,3 +1,8 @@
+# UNMAINTAINED
+
+It's a nice idea, but I don't have enough resources to keep this project going.
+
+<br>
 
 ### Python Bindings for PhysX4
 
